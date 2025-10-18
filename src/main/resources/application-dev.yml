@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/blog
+    username: ${DBMS_USERNAME_DEV:root}
+    password: ${DBMS_PASSWORD_DEV:123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+  security:
+    user:
+      name: admin
+      password: admin
+      roles: ADMIN
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+  redis:
+    host: localhost
+    port: 6379
+    password: mypasswor
+jwt:
+  signerKeyAccess: ${SIGNER_KEY_ACCESS_DEV}
+  signerKeyRefresh: ${SIGNER_KEY_REFRESH_DEV}
+  valid-duration: 260 # in second
+  refreshable-duration: 2592000 # in seconds
+
+outbound:
+  identity:
+    client-id: ${CLIENT_ID_DEV}
+    client-secret: ${CLIENT_SECRET_DEV}
+    redirect-uri: ${REDIRECT_URI_DEV}
+app:
+  file:
+    base_url: http://localhost:8080/uploads/
