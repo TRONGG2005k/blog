@@ -28,6 +28,8 @@ services:
   mysql:
     image: mysql:innovation-oracle
     container_name: my-mysql1
+    env_file:
+      - .env
     environment:
       - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
       - MYSQL_DATABASE=blog
