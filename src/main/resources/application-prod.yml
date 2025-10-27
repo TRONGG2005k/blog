@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    url: ${DBMS_URL_DEV}
+    username: ${DBMS_USERNAME_DEV}
+    password: ${DBMS_PASSWORD_DEV}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none   # production không update schema tự động
+    show-sql: false    # tránh log query trong production
+
+  redis:
+    host: ${SPRING_REDIS_HOST}
+    port: ${SPRING_REDIS_PORT}
+    password: ${SPRING_REDIS_PASSWORD}
+
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+
+jwt:
+  signerKeyAccess: ${SIGNER_KEY_ACCESS_DEV}
+  signerKeyRefresh: ${SIGNER_KEY_REFRESH_DEV}
+  valid-duration: 260
+  refreshable-duration: 2592000
+
+outbound:
+  identity:
+    client-id: ${CLIENT_ID_DEV}
+    client-secret: ${CLIENT_SECRET_DEV}
+    redirect-uri: ${REDIRECT_URI_DEV}
+
+app:
+  file:
+    base_url: ${FILE_BASE_URL}

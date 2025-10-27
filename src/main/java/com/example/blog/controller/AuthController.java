@@ -36,6 +36,7 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(LoginResponse.builder()
                         .token(loginResponse.getToken())
+                        .role(loginResponse.getRole())
                         .build());
     }
 
@@ -88,6 +89,7 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, cookie.toString())
                 .body(LoginResponse.builder()
                         .token(loginResponse.getToken())
+                        .role(loginResponse.getRole())
                         .build());
     }
 }

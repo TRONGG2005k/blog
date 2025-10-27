@@ -1,0 +1,46 @@
+version: "3.8"
+services:
+  app:
+    build: .
+    container_name: blog1
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+    env_file:
+      - .env
+    environment:
+      - DBMS_URL_DEV=${DB_URL}
+      - DBMS_USERNAME_DEV=${DB_USERNAME}
+      - DBMS_PASSWORD_DEV=${DB_PASSWORD}
+      - SPRING_REDIS_HOST=${REDIS_HOST}
+      - SPRING_REDIS_PORT=${REDIS_PORT}
+      - SPRING_REDIS_PASSWORD=${REDIS_PASSWORD}
+      - SIGNER_KEY_ACCESS_DEV=${JWT_SIGNER_ACCESS}
+      - SIGNER_KEY_REFRESH_DEV=${JWT_SIGNER_REFRESH}
+      - CLIENT_ID_DEV=${GOOGLE_CLIENT_ID}
+      - CLIENT_SECRET_DEV=${GOOGLE_CLIENT_SECRET}
+      - REDIRECT_URI_DEV=${GOOGLE_REDIRECT_URI}
+      - FILE_BASE_URL=${FILE_BASE_URL}
+    volumes:
+      - ./uploads:/app/uploads
+  mysql:
+    image: mysql:innovation-oracle
+    container_name: my-mysql1
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=blog
+      - MYSQL_ROOT_HOST=%
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysqldata:/var/lib/mysql
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+volumes:
+  mysqldata:

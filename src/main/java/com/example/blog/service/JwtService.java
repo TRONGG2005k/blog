@@ -92,15 +92,17 @@ public class JwtService {
         return SignedJWT.parse(token);
     }
 
-    public boolean verifyRefreshToken(String token) throws ParseException, JOSEException {
+    public void verifyRefreshToken(String token) throws ParseException, JOSEException {
         SignedJWT jwt = getClaims(token);
         Date expirationTime = jwt.getJWTClaimsSet().getExpirationTime();
         String jwtId = jwt.getJWTClaimsSet().getJWTID();
         String type = jwt.getJWTClaimsSet().getStringClaim("type");
         if (!"refresh".equals(type)) {
+            log.warn("lỗi ở đây");
             throw new AppException(ErrorCode.INVALID_TOKEN_TYPE);
         }
         if(!jwt.verify(new MACVerifier(SECRET_KEY_REFRESH.getBytes()))){
+            log.warn("lỗi ở đây");
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
         if(expirationTime == null || expirationTime.before(new Date())){
@@ -108,6 +110,5 @@ public class JwtService {
         }
         refreshTokenRepository.findByJwtID(jwtId).orElseThrow(
                 () -> new AppException(ErrorCode.INVALID_TOKEN));
-        return true;
     }
 }

@@ -25,11 +25,15 @@ public class CommentController {
     }
 
     // ✅ READ (Lấy tất cả comment của 1 bài post)
-    @GetMapping("/post/{postId}")
-    public ResponseEntity<List<CommentResponse>> getCommentsByPost(@PathVariable String postId) {
-        List<CommentResponse> comments = commentService.getCommentsByPostId(postId);
-        return ResponseEntity.ok(comments);
+    @GetMapping("/{postId}/comments")
+    public ResponseEntity<?> getComments(
+            @PathVariable String postId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(commentService.getCommentsByPostId(postId, page, size));
     }
+
 
     // ✅ UPDATE
     @PutMapping("/{commentId}")

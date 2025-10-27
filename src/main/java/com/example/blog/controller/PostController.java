@@ -1,6 +1,7 @@
 package com.example.blog.controller;
 
 import com.example.blog.dto.request.PostRequest;
+import com.example.blog.dto.response.PostAdminResponse;
 import com.example.blog.dto.response.PostResponse;
 import com.example.blog.dto.response.PostSummaryResponse;
 import com.example.blog.service.PostService;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +29,27 @@ public class PostController {
         Page<PostSummaryResponse> response = postService.getAllPosts(page, size);
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/my-posts")
+    public ResponseEntity<Page<PostSummaryResponse>> getAllMyPost(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<PostSummaryResponse> response = postService.getMyPosts(page, size);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('ADMIN')")
+
+    public ResponseEntity<Page<PostAdminResponse>> getAllPostsForAdmin(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<PostAdminResponse> response = postService.getPosts(page, size);
+        return ResponseEntity.ok(response);
+    }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<PostResponse> getPostById(@PathVariable String id) {

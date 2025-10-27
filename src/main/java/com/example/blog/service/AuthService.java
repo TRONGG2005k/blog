@@ -56,10 +56,11 @@ public class AuthService {
 
 
         log.warn(jwtService.getClaims(accessToken).getJWTClaimsSet().getExpirationTime().toString());
-
+        String role = refreshTokenClaims.getJWTClaimsSet().getClaimAsString("scope");
         return LoginResponse.builder()
                 .token(accessToken)
                 .refreshToken(refreshToken)
+                .role(role)
                 .build();
     }
 
@@ -119,14 +120,17 @@ public class AuthService {
         String refreshToken = jwtService.generateRefreshToken(user);
 
         var refreshTokenClaims = jwtService.getClaims(refreshToken);
+
         refreshTokenRepository.save(RefreshToken.builder()
                 .jwtID(refreshTokenClaims.getJWTClaimsSet().getJWTID())
                 .username(user.getUsername())
                 .ttl(2_592_000L)
                 .build());
+        String roles = refreshTokenClaims.getJWTClaimsSet().getClaimAsString("scope");
         return LoginResponse.builder()
                 .token(accessToken)
                 .refreshToken(refreshToken)
+                .role(roles)
                 .build();
 
     }

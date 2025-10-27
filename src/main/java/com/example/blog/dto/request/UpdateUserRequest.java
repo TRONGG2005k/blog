@@ -26,4 +26,6 @@ public class UpdateUserRequest {
     @NotBlank(message = "Email is mandatory")
     @NotNull(message = "Email must be not null")
     String email;
+
+
 }

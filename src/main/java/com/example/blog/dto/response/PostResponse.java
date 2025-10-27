@@ -6,6 +6,7 @@ import com.example.blog.entity.Tag;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -19,7 +20,8 @@ public class PostResponse {
     private String caption;
     private UserResponse user;
     private List<CommentResponse> comments;
-    private List<Media> mediaList;
-    private List<PostReactionResponse> reactions;
+    private List<String> mediaUrls;
+    private long reactions;
     private Set<Tag> tags;
+    private LocalDateTime createdAt;
 }

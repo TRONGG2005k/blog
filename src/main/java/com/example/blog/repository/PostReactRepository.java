@@ -22,4 +22,6 @@ public interface PostReactRepository extends JpaRepository<PostReaction, String>
     """)
     List<Object[]> countReactionsForPosts(@Param("postIds") List<String> postIds);
 
+    @Query("SELECT COUNT(r) FROM PostReaction r WHERE r.post.id = :postId")
+    long countByPostId(@Param("postId") String postId);
 }

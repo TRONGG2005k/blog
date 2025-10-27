@@ -7,10 +7,13 @@ import com.example.blog.entity.Comment;
 import com.example.blog.entity.Post;
 import com.example.blog.entity.User;
 import com.example.blog.exceptionHanding.exception.AppException;
+import com.example.blog.mapper.CommentMapper;
 import com.example.blog.repository.CommentRepository;
 import com.example.blog.repository.PostRepository;
 import com.example.blog.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -54,18 +57,35 @@ public class CommentService {
     }
 
     // ✅ READ - Get all comments by postId
-    public List<CommentResponse> getCommentsByPostId(String postId) {
-        List<Comment> comments = commentRepository.findByPostIdAndParentIsNullAndIsDeletedFalse(postId);
+    public Page<CommentResponse> getCommentsByPostId(String postId, int page, int size) {
 
-        // Map thành response + lấy replies đệ quy
-        return comments.stream()
-                .map(this::toResponseWithReplies)
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        Page<Comment> commentsPage = commentRepository
+                .findByPostIdAndParentIsNullAndIsDeletedFalse(postId, pageable);
+
+        List<CommentResponse> responses = commentsPage.getContent()
+                .stream()
+                .map(comment -> {
+                    boolean isAdmin = auth.getAuthorities().stream()
+                            .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                    return CommentMapper.INSTANCE.toResponse(comment, username, isAdmin); // quan trọng: trả về response
+                })
                 .collect(Collectors.toList());
+
+        return new PageImpl<>(responses, pageable, commentsPage.getTotalElements());
     }
+
+
+
 
     // ✅ UPDATE
     public CommentResponse update(String commentId, CommentRequest request) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
@@ -80,8 +100,9 @@ public class CommentService {
         comment.setUpdatedAt(LocalDateTime.now());
 
         Comment updated = commentRepository.save(comment);
-
-        return toResponse(updated);
+        boolean isAdmin = auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        return CommentMapper.INSTANCE.toResponse(updated, username, isAdmin);
     }
 
     // ✅ DELETE (Soft delete)
@@ -93,7 +114,8 @@ public class CommentService {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
 
-        if (!comment.getUser().getId().equals(user.getId())) {
+        if (!comment.getUser().getId().equals(user.getId())
+                && user.getRoles().stream().noneMatch(role -> "ROLE_ADMIN".equals(role.getName()))) {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
@@ -118,16 +140,5 @@ public class CommentService {
                 .build();
     }
 
-    private CommentResponse toResponseWithReplies(Comment comment) {
-        CommentResponse response = toResponse(comment);
 
-        List<CommentResponse> replies = comment.getReplies() == null ? List.of() :
-                comment.getReplies().stream()
-                        .filter(reply -> !Boolean.TRUE.equals(reply.getIsDeleted()))
-                        .map(this::toResponseWithReplies)
-                        .collect(Collectors.toList());
-
-        response.setReplies(replies);
-        return response;
-    }
 }

@@ -28,6 +28,7 @@ public class CommentResponse {
 
     int reactionCount; // tổng số reaction của comment
 
-    // nếu muốn hiển thị các comment con (reply)
-    List<CommentResponse> replies;
+    boolean canEdit;
+
+    boolean canDelete;
 }

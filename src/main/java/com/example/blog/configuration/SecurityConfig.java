@@ -33,23 +33,25 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        System.out.println("✅ SecurityConfig loaded");
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // ✅ CORS đặt lên đầu
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers(publicPaths).permitAll()
                         .anyRequest().authenticated()
                 )
-                .csrf(AbstractHttpConfigurer::disable)
                 .oauth2ResourceServer(oauth2ResourceServer ->
                         oauth2ResourceServer
                                 .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
                 )
                 .exceptionHandling(exceptions -> exceptions
-                        .accessDeniedHandler(new CustomAccessDeniedHandler()));
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
+                        .accessDeniedHandler(new CustomAccessDeniedHandler())
+                );
+
         return http.build();
     }
+
 
     @Bean
     public JwtDecoder jwtDecoder(@Value("${jwt.signerKeyAccess}") String signerKey) {
@@ -82,7 +84,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(List.of("*")); // Dùng allowedOriginPatterns thay vì allowedOrigins
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
